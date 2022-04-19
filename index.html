@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Litesphere Voltage Drop Calculator</title>
+
+    <link rel="stylesheet" type="text/css" href="catalog.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,800&display=swap"
+        rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        body
+        {   font-family: 'Poppins', sans-serif;
+            background-image: url(bg5.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        .body {
+            padding-top: 5vw;
+            margin-left: 20vw;
+        }
+
+        img {
+            margin-left: 0;
+        }
+
+.button-40 {
+  background-color: #111827;
+  border: 1px solid transparent;
+  border-radius: .75rem;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  padding: .75rem 1.2rem;
+  text-align: center;
+  text-decoration: none #6B7280 solid;
+  text-decoration-thickness: auto;
+  transition-duration: .2s;
+  transition-property: background-color,border-color,color,fill,stroke;
+  transition-timing-function: cubic-bezier(.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: auto;
+}
+
+.button-40:hover {
+  background-color: #374151;
+}
+
+.button-40:focus {
+  box-shadow: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .button-40 {
+    padding: .75rem 1.5rem;
+  }
+}
+    </style>
+
+</head>
+
+
+
+<body>
+
+
+    <div class="body">
+
+        <img src="logo.png">
+        <h1>Litesphere Voltage Drop Calculator</h1>
+        <p>Voltage drop and max run lengths for Litesphere can vary with custom OC. Please use this to calculate.
+
+        </P>
+
+        <div id="calculator">
+
+            <form onsubmit="return false;">
+
+                Run Length (ft):<br>
+
+                <input type="double" name="rlength" id="rlength" placeholder="ft">
+
+                <br><br>
+
+                OC space (inches):<br>
+
+                <input type="double" name="oc" id="oc" placeholder="inches">
+
+                <br><br>
+
+                Lead Length (ft):<br>
+
+                <input type="double" name="plength" id="plength" placeholder="ft">
+
+                <br><br>
+                Lead Wire Gauge (AWG):<br>
+                <input onclick="updateVal()" type="radio" name="gauge" id="gauge" placeholder="10" value=0.9989> 10
+                <input onclick="updateVal()" type="radio" name="gauge" id="gauge" placeholder="12" value=1.588> 12
+                <input onclick="updateVal()" type="radio" name="gauge" id="gauge" placeholder="14" value=2.525> 14
+                <input onclick="updateVal()" type="radio" name="gauge" id="gauge" placeholder="16" value=4.016> 16
+                <input onclick="updateVal()" type="radio" name="gauge" id="gauge" placeholder="18" value=6.385> 18
+                <input onclick="updateVal()" type="radio" name="gauge" id="gauge" placeholder="20" value=10.15> 20
+                <br><br>
+                Output:<br>
+                <input onclick="updateVal()" type="radio" name="output" id="output" placeholder="SB" value=.09> SB
+
+                <input onclick="updateVal()" type="radio" name="output" id="output" placeholder="HO" value=.23> HO
+
+                <input onclick="updateVal()" type="radio" name="output" id="output" placeholder="VHO" value=.96> VHO
+
+                <br><br>
+
+
+                <button class="button-40" role="button" onclick="calculateVDrop()">Calculate</button>
+                <a class="button-40" role="button" href="maxLead.html">Max Lead Calculator</a>
+
+                <br>
+
+                <br>
+
+                <p id="result1"></p>
+                <p id="result2"></p>
+                <p id="result3"></p>
+                <p id="result4"></p>
+
+            </form>
+
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+
+
+
+    function calculateVDrop() {
+        let voltage = parseFloat(12);
+        let runGauge = parseFloat(4.016);
+        let rlength = parseFloat(document.getElementById("rlength").value);
+
+        let plength = parseFloat(document.getElementById("plength").value);
+
+        let gauge = parseFloat(document.querySelector('input[name="gauge"]:checked').value);
+
+        let output = parseFloat(document.querySelector('input[name="output"]:checked').value);
+
+        let oc = parseFloat(parseFloat(document.getElementById("oc").value) / 12);
+
+        let amps1 = parseFloat(((rlength / oc) * output) / voltage);
+        let vDropLead = parseFloat(amps1 * (2 * plength * gauge / 1000));
+        let amps2 = parseFloat(((rlength / oc) * output) / (voltage - vDropLead));
+
+        // calculate vDrop
+        let vDropRun = parseFloat(amps2 * (2 * rlength * runGauge / 1000));
+        let vDrop = parseFloat(vDropRun + vDropLead);
+        let vDropPercent = (parseFloat(vDrop / voltage) * 100).toFixed(2);
+
+        $('#result1').text('Voltage drop on lead is ' + vDropLead.toFixed(2) + 'VDC');
+        $('#result2').text('Voltage drop on run is ' + vDropRun.toFixed(2) + 'VDC');
+        $('#result3').text('Total Voltage Drop is ' + vDrop.toFixed(2) + 'VDC');
+        $('#result4').text('Total Voltage Percent is ' + vDropPercent + '%');
+
+    }
+    function updateVal() {
+        gauge = parseFloat(document.querySelector('input[name="gauge"]:checked').value);
+        output = parseFloat(document.querySelector('input[name="output"]:checked').value);
+    }
+
+</script>
+
+</html>
